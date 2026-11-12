@@ -1,0 +1,52 @@
+<% content_for :title, @item.title %>
+
+<article class="bg-white rounded-lg border border-gray-200 p-6">
+  <p class="text-sm text-gray-500 mb-1">
+    <%= @item.user.name %> is looking for…
+  </p>
+  <h1 class="font-bold text-3xl"><%= @item.title %></h1>
+  <% if @item.description.present? %>
+    <div class="mt-4 text-gray-700"><%= simple_format @item.description %></div>
+  <% end %>
+  <p class="text-xs text-gray-500 mt-4">Posted <%= time_ago_in_words(@item.created_at) %> ago</p>
+
+  <% if Current.user == @item.user %>
+    <div class="flex gap-2 mt-4">
+      <%= link_to "Edit", edit_item_path(@item), class: "rounded-md px-3 py-2 bg-gray-100 hover:bg-gray-200 text-sm font-medium" %>
+      <%= button_to "Delete", @item, method: :delete, class: "rounded-md px-3 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-medium cursor-pointer", data: { turbo_confirm: "Delete this post?" } %>
+    </div>
+  <% end %>
+</article>
+
+<section class="mt-8">
+  <h2 class="font-semibold text-xl mb-4"><%= pluralize(@item.comments.size, "comment") %></h2>
+
+  <div class="space-y-3">
+    <% @item.comments.each do |comment| %>
+      <div id="<%= dom_id comment %>" class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="flex justify-between items-start gap-2">
+          <p class="text-sm text-gray-500">
+            <strong class="text-gray-800"><%= comment.user.name %></strong> · <%= time_ago_in_words(comment.created_at) %> ago
+          </p>
+          <% if Current.user == comment.user %>
+            <%= button_to "Delete", item_comment_path(@item, comment), method: :delete, class: "text-xs text-red-600 underline cursor-pointer", data: { turbo_confirm: "Delete comment?" } %>
+          <% end %>
+        </div>
+        <div class="mt-2 text-gray-800"><%= simple_format comment.body %></div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if Current.user %>
+    <%= form_with model: [ @item, @comment ], class: "mt-6" do |f| %>
+      <%= f.label :body, "Know where to find it? Leave a comment", class: "font-medium" %>
+      <%= f.textarea :body, rows: 3, required: true, class: "block w-full mt-2 rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+      <%= f.submit "Comment", class: "mt-2 rounded-md px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium cursor-pointer" %>
+    <% end %>
+  <% else %>
+    <p class="mt-6 text-gray-600">
+      <%= link_to "Sign in", new_session_path, class: "underline" %> or
+      <%= link_to "sign up", new_registration_path, class: "underline" %> to comment.
+    </p>
+  <% end %>
+</section>

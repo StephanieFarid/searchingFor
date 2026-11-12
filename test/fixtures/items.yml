@@ -1,0 +1,10 @@
+camera:
+  title: Vintage Polaroid camera
+  description: Working condition please
+  user: one
+  comments_count: 1
+
+book:
+  title: First edition novel
+  description: Hardcover
+  user: two

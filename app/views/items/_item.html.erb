@@ -1,0 +1,10 @@
+<%= link_to item, id: dom_id(item), class: "block bg-white rounded-lg border border-gray-200 p-5 hover:border-blue-400 hover:shadow-sm transition" do %>
+  <h2 class="font-semibold text-lg"><%= item.title %></h2>
+  <% if item.description.present? %>
+    <p class="text-gray-600 mt-1 line-clamp-2"><%= item.description %></p>
+  <% end %>
+  <p class="text-xs text-gray-500 mt-3">
+    <%= item.user.name %> · <%= time_ago_in_words(item.created_at) %> ago ·
+    <%= pluralize(item.comments_count, "comment") %>
+  </p>
+<% end %>

@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+/* Palette taken from typesense.org's stylesheet. */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #353fd7;      /* Typesense indigo: links, primary buttons */
+  --color-primary-dark: #1b2071; /* navy: hover, header band */
+  --color-accent: #c0ff58;       /* lime: call-to-action buttons */
+  --color-accent-soft: #e1ffb2;  /* pale lime: highlights */
+  --color-accent-ink: #263311;   /* dark green text on lime */
+  --color-ink: #000000;
+  --color-muted: #4d4d4d;
+  --color-surface: #fafafa;
+  --color-subtle: #f1f1f1;
+  --color-line: #d7d7d7;
+}
+
+mark {
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent-ink);
+  border-radius: 0.2em;
+  padding: 0 0.1em;
+}

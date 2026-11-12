@@ -1,26 +1,14 @@
 class CommentsController < ApplicationController
-  before_action :set_item
+  rate_limit to: 10, within: 5.minutes, only: :create,
+    with: -> { redirect_back_or_to root_path, alert: "You're commenting too fast. Try again in a few minutes." }
 
   def create
-    @comment = @item.comments.new(comment_params.merge(user: Current.user))
-    if @comment.save
-      redirect_to item_path(@item, anchor: helpers.dom_id(@comment)), notice: "Comment added."
+    item = Item.find(params.expect(:item_id))
+    comment = item.comments.new(params.expect(comment: [ :body ]))
+    if comment.save
+      redirect_to item_path(item, anchor: helpers.dom_id(comment)), notice: "Comment added."
     else
-      redirect_to item_path(@item), alert: @comment.errors.full_messages.to_sentence
+      redirect_to item_path(item), alert: comment.errors.full_messages.to_sentence
     end
   end
-
-  def destroy
-    @item.comments.where(user: Current.user).find(params.expect(:id)).destroy!
-    redirect_to item_path(@item), notice: "Comment deleted.", status: :see_other
-  end
-
-  private
-    def set_item
-      @item = Item.find(params.expect(:item_id))
-    end
-
-    def comment_params
-      params.expect(comment: [ :body ])
-    end
 end

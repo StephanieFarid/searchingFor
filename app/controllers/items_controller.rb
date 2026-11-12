@@ -1,56 +1,39 @@
 class ItemsController < ApplicationController
-  allow_unauthenticated_access only: %i[index show]
-  before_action :resume_session, only: %i[index show]
-  before_action :set_item, only: %i[show]
-  before_action :set_own_item, only: %i[edit update destroy]
+  rate_limit to: 5, within: 10.minutes, only: :create,
+    with: -> { redirect_back_or_to root_path, alert: "You're posting too fast. Try again in a few minutes." }
 
   def index
     @query = params[:q].to_s.strip
-    @items = Item.search(@query).includes(:user).order(created_at: :desc)
+    @highlights = {}
+
+    if @query.blank?
+      @items = Item.order(created_at: :desc)
+    else
+      begin
+        result = ItemSearch.search(@query)
+        @items, @highlights = result.items, result.highlights
+      rescue *ItemSearch::UNAVAILABLE => e
+        Rails.logger.warn("Typesense unavailable, using SQL search: #{e.class}: #{e.message}")
+        @items = Item.search(@query).order(created_at: :desc)
+      end
+    end
   end
 
   def show
+    @item = Item.includes(:comments).find(params.expect(:id))
     @comment = Comment.new
   end
 
-  def new
-    @item = Item.new
-  end
-
-  def edit
-  end
-
   def create
-    @item = Current.user.items.new(item_params)
+    @item = Item.new(item_params)
     if @item.save
-      redirect_to @item, notice: "Your search was posted."
+      redirect_to @item, notice: "Your post is up."
     else
-      render :new, status: :unprocessable_content
+      redirect_back_or_to root_path, alert: @item.errors.full_messages.to_sentence
     end
-  end
-
-  def update
-    if @item.update(item_params)
-      redirect_to @item, notice: "Item updated.", status: :see_other
-    else
-      render :edit, status: :unprocessable_content
-    end
-  end
-
-  def destroy
-    @item.destroy!
-    redirect_to items_path, notice: "Item deleted.", status: :see_other
   end
 
   private
-    def set_item
-      @item = Item.includes(comments: :user).find(params.expect(:id))
-    end
-
-    def set_own_item
-      @item = Current.user.items.find(params.expect(:id))
-    end
-
     def item_params
       params.expect(item: [ :title, :description ])
     end

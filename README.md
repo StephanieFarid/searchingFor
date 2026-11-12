@@ -1,24 +1,16 @@
-# README
+# Searching For
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Post what you're searching for; others comment with leads. Search is powered by Typesense.
 
-Things you may want to cover:
+## Setup
 
-* Ruby version
+```sh
+bin/setup
+export TYPESENSE_API_KEY=...        # your Typesense admin key
+# optional: TYPESENSE_HOST (localhost), TYPESENSE_PORT (8108), TYPESENSE_PROTOCOL (http)
+bin/rails typesense:reindex          # create the "items" collection and index existing posts
+bin/dev
+```
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+New, edited, and deleted posts are synced to Typesense by `ItemIndexJob`.
+If Typesense can't be reached, search falls back to a basic SQL `LIKE` query.
